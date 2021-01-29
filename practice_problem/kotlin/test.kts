@@ -21,6 +21,7 @@ var pizzaList = ArrayList<Pizza>()
 
 fun readFileLineByLineUsingForEachLine(fileName: String) {
     var index: Int = 0
+    var npizzaList = ArrayList<Pizza>()
     File(fileName).forEachLine {
         if (index == 0) {
             // first line parsing
@@ -30,12 +31,13 @@ fun readFileLineByLineUsingForEachLine(fileName: String) {
             team3ppl = nteam3ppl.toInt()
             team4ppl = nteam4ppl.toInt()
         } else {
+
           var pizza = Pizza(index - 1, it)
-          println(pizza)      
-          pizzaList.add(pizza)
+          npizzaList.add(pizza) 
         }
         index++
     }
+    pizzaList = npizzaList
 }
 
 fun doStuff(fileName: String) {

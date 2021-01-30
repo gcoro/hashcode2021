@@ -1,11 +1,10 @@
 import java.io.File
-import java.util.*
 
 
 class Pizza constructor(index: Int, pizzaRow: String) {
     val index= index
     val ingredientsCount = pizzaRow.split(' ')[0]
-    val ingredients = pizzaRow.split(' ').slice(1..pizzaRow.split(' ').size - 1)
+    val ingredients = pizzaRow.split(' ').slice(1..pizzaRow.split(' ').size - 1).sorted()
 }
 
 //  kotlinc -script test.kts ./a_example.in
@@ -15,6 +14,8 @@ var team2ppl: Int = 0
 var team3ppl: Int = 0
 var team4ppl: Int = 0
 var pizzaList =  ArrayList<Pizza>()
+var countTeam: Int = 0
+var teamDeliveries = ArrayList<Array<String>>()
 
 args.forEach {
     println("input file -> $it")
@@ -32,15 +33,42 @@ fun readFileLineByLineUsingForEachLine(fileName: String) {
             team3ppl = nteam3ppl.toInt()
             team4ppl = nteam4ppl.toInt()
         } else {
-
           var pizza = Pizza(index - 1, it)
             pizzaList.add(pizza)
         }
         index++
     }
+    pizzaList.sortByDescending {
+        it.ingredientsCount
+    }
+
+    (1..team4ppl).forEach{
+        if (pizzaList.size >= 4){
+            teamDeliveries.add(arrayOf("4",pizzaList.removeAt(0).index.toString(), pizzaList.removeAt(0).index.toString(), pizzaList.removeAt(0).index.toString(),pizzaList.removeAt(0).index.toString() ))
+            countTeam++;
+        }
+        println(it)
+    }
+    (1..team3ppl).forEach{
+        if (pizzaList.size >= 3){
+            teamDeliveries.add(arrayOf("3",pizzaList.removeAt(0).index.toString(), pizzaList.removeAt(0).index.toString(), pizzaList.removeAt(0).index.toString()))
+            countTeam++;
+        }
+        println(it)
+    }
+    (1..team2ppl).forEach{
+        if (pizzaList.size >= 2){
+            teamDeliveries.add(arrayOf("2",pizzaList.removeAt(0).index.toString(), pizzaList.removeAt(0).index.toString()))
+            countTeam++;
+        }
+        println(it)
+    }
+    teamDeliveries.add(0,arrayOf(countTeam.toString()) )
 }
 
 fun doStuff(fileName: String) {
         readFileLineByLineUsingForEachLine(fileName)
-        // todo
+        File("./"+fileName +"out").writeText(teamDeliveries.map {
+            it.joinToString(" ")
+        }.joinToString("\n"))
 }

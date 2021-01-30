@@ -1,4 +1,6 @@
 import java.io.File
+import java.util.*
+
 
 class Pizza constructor(index: Int, pizzaRow: String) {
     val index= index
@@ -8,20 +10,19 @@ class Pizza constructor(index: Int, pizzaRow: String) {
 
 //  kotlinc -script test.kts ./a_example.in
 
+var pizzaTotal : Int = 0
+var team2ppl: Int = 0
+var team3ppl: Int = 0
+var team4ppl: Int = 0
+var pizzaList =  ArrayList<Pizza>()
+
 args.forEach {
     println("input file -> $it")
     doStuff(it)
 }
 
-var pizzaTotal : Int = 0
-var team2ppl: Int = 0
-var team3ppl: Int = 0
-var team4ppl: Int = 0
-var pizzaList = ArrayList<Pizza>()
-
 fun readFileLineByLineUsingForEachLine(fileName: String) {
     var index: Int = 0
-    var npizzaList = ArrayList<Pizza>()
     File(fileName).forEachLine {
         if (index == 0) {
             // first line parsing
@@ -33,11 +34,10 @@ fun readFileLineByLineUsingForEachLine(fileName: String) {
         } else {
 
           var pizza = Pizza(index - 1, it)
-          npizzaList.add(pizza) 
+            pizzaList.add(pizza)
         }
         index++
     }
-    pizzaList = npizzaList
 }
 
 fun doStuff(fileName: String) {

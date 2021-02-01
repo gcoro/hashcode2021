@@ -54,8 +54,8 @@ const intersect = (a, b) => {
 	return a.filter(Set.prototype.has, new Set(b));
 }
 
-const removeAtIndex = (array, index) => {
-	return array.splice(index, 1);
+const removePizzaAtIndex = (index) => {
+	return pizzaList.splice(index, 1);
 }
 
 const removePizzaFromList = (pizza) => {
@@ -67,14 +67,36 @@ const removePizzaFromList = (pizza) => {
 	return remaining;
 }
 
+const isOK = (pizza, otherPizzas) => {
+	let merged = otherPizzas.reduce((acc, p) => acc.concat(p.ingredients), [])
+	if(intersect(merged, pizza.ingredients) >= 3) {
+		return true
+	} else {
+		return false
+	}
+}
+
 const selectPizzas = (membersNumber) => {
 	if(pizzaList.length < membersNumber) {
 		return null
 	}
 
 	const arr = []
-	for (let i = 0; i < membersNumber; i++) {
-		arr.push(pizzaList.shift())
+	let countIndex = 0
+	let countPushed = 0
+	while (countPushed < membersNumber) {
+		// check if we finished the pizzas
+		if(countIndex >= pizzaList.length) {
+			arr.push(pizzaList.shift())
+			countPushed++
+			countIndex = 0
+		} else if(isOK(pizzaList[countIndex], arr)) {
+			arr.push(removePizzaAtIndex(countIndex))
+			countPushed++
+			countIndex = 0
+		} else {
+			countIndex++
+		}
 	}
 	return arr;
 }
@@ -83,8 +105,14 @@ const getResult = () => {
 	const start = now();
 	// add logic here
 	const deliveries = [];
+	pizzaList.sort(
+		(a,b) => {
+			if (a.ingredientsCount < b.ingredientsCount) return -1
+			if (a.ingredientsCount > b.ingredientsCount) return 1
+			return 0;
+		});
 	// deliveries model is { members(int), selectedPizzas(obj)}
-	['2', '3', '4'].forEach(numerosity => {
+	['3', '4', '2'].forEach(numerosity => {
 		for (let i = 0; i < +teams[numerosity]; i++) {
 			if(!pizzaList.length) return; 
 			let selected =  selectPizzas(+numerosity);
@@ -96,8 +124,6 @@ const getResult = () => {
 			})
 		}
 	})
-
-	console.log(deliveries)
 
 	const end = now();
 	console.log(`getResult took ${(end - start).toFixed(3)} ms`);

@@ -74,8 +74,7 @@ const selectPizzas = (membersNumber) => {
 
 	const arr = []
 	for (let i = 0; i < membersNumber; i++) {
-		arr.push(pizzaList[0])
-		pizzaList.shift()
+		arr.push(pizzaList.shift())
 	}
 	return arr;
 }
@@ -85,15 +84,14 @@ const getResult = () => {
 	// add logic here
 	const deliveries = [];
 	// deliveries model is { members(int), selectedPizzas(obj)}
-	const teamTypes = ['2', '3', '4'];
-	teamTypes.forEach(type => {
-		for (let i = 0; i < +type; i++) {
+	['2', '3', '4'].forEach(numerosity => {
+		for (let i = 0; i < +teams[numerosity]; i++) {
 			if(!pizzaList.length) return; 
-			let selected =  selectPizzas(+type);
+			let selected =  selectPizzas(+numerosity);
 			if(!selected) return;
 
 			deliveries.push({
-				members: type,
+				members: numerosity,
 				selectedPizzas: selected
 			})
 		}

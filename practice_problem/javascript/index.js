@@ -30,26 +30,27 @@ const parseInput = (contentToParse) => {
 	return { pizzaTotal, team2ppl, team3ppl, team4ppl, pizzaList };
 };
 
-const parseOutput = (selectedPizzas) => {
+const parseOutput = (deliveries) => {
 	const start = now();
 	// todo
 	const end = now();
 	console.log(`parseOutput took ${(end - start).toFixed(3)} ms`);
-	return [selectedPizzas.length.toString(), selectedPizzas.join(' ')];
+	return [];
 };
 
 const getResult = (teams, pizzas) => {
 	const start = now();
 	// add logic here
-
+	console.log(teams)
+	console.log(pizzas)
 
 	const end = now();
 	console.log(`getResult took ${(end - start).toFixed(3)} ms`);
-	return []
+	return [];
 };
 
 const content = readContent();
 const { team2ppl, team3ppl, team4ppl, pizzaList } = parseInput(content);
-const deliveries = getResult({ 2: team2ppl, 3: team3ppl, 4: team4ppl }, pizzaList);
+const deliveries = getResult({ 2: +team2ppl, 3: +team3ppl, 4: +team4ppl }, pizzaList);
 const parsedOutput = parseOutput(deliveries);
 writeToFile(parsedOutput);

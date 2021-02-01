@@ -100,7 +100,8 @@ fun readFileLineByLineUsingForEachLine(fileName: String) {
 
 fun doStuff(fileName: String) {
     readFileLineByLineUsingForEachLine(fileName)
-    File("./" + fileName + "out").writeText(teamDeliveries.map {
+    File("./" + fileName.split('.').toTypedArray().first() + ".out")
+    .writeText(teamDeliveries.map {
         it.joinToString(" ")
     }.joinToString("\n"))
 }

@@ -15,7 +15,7 @@ const validateSlices = (slices) => {
 		let slice1 = slices[i];
 		for (let k = 0; k < slices.length; k++) {
 			if (i != k) {
-				if (checkOverLap(slice1, slices[k])) {
+				if (areSlicesOverlapping(slice1, slices[k]) || areSlicesOverlapping(slices[k], slice1)) {
 					console.log(`Slices ${i} and ${k} overlap`);
 				}
 			}
@@ -88,15 +88,8 @@ const parseInput = (contentToParse) => {
 	calculatePoints(slices);
 };
 
-const checkOverLap = (slice1, slice2) => {
-	let leftX   = Math.max(slice1.cStart, slice2.cStart);
-	let rightX  = Math.min(slice1.cEnd, slice2.cEnd);
-	let topY    = Math.max(slice1.rStart, slice2.rStart);
-	let bottomY = Math.min(slice1.rEnd, slice2.rEnd);
-
-	if (leftX<rightX && topY<bottomY) return true;
-
-	//return ((slice1.rStart < slice2.rStart &&  slice2.rStart<slice1.rEnd) && (slice1.cStart <slice2.cStart && slice2.cStart<slice1.cEnd));
+const areSlicesOverlapping = (slice1, slice2) => {
+	return ((slice1.rStart <= slice2.rStart &&  slice2.rStart<=slice1.rEnd) && (slice1.cStart <=slice2.cStart && slice2.cStart<=slice1.cEnd));
 }
 
 const updatePizza = (pizza, rStart, rEnd, cStart, cEnd) => {
@@ -203,3 +196,15 @@ const canExpandColumn = (i, currentIndexRow, pizza, currentIndexColumn) =>{
 
 const content = readContent();
 parseInput(content);
+
+
+/*
+let slice1 = createSlice(0,2,0,1)
+let slice = createSlice(0,2,1,2)
+console.log(slice1)
+console.log(slice)
+
+console.log(areSlicesOverlapping(slice1, slice))
+*/
+
+

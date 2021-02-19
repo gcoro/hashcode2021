@@ -80,7 +80,6 @@ const parseInput = (contentToParse) => {
     result.push(prevSlide.index);
 
     while(slides.length){
-        console.log(slides.length)
         let selectedIndex = selectSlide(prevSlide, slides);
         let selectedSlide = slides.splice(selectedIndex, 1)[0];
 
@@ -90,15 +89,23 @@ const parseInput = (contentToParse) => {
     writeToFile(result);
 };
 
+function intersect(a, b) {
+    return a.filter(Set.prototype.has, new Set(b));
+}
+
+function diff(a, b) {
+    return a.filter(x => !b.has(x));
+}
+
 const selectSlide = (prevSlide, slides) => {
     let selectedSlide = 0;
     let maxTagsInCommon = 0;
     const maxPossible = Math.floor(prevSlide.tags.length / 2);
 
     for(let i=0; i<slides.length && maxPossible!=maxTagsInCommon; i++){
-        let prevSlideTag = prevSlide.tags.filter(value => !slides[i].tags.includes(value));
-        let currentSlideTag = slides[i].tags.filter(value => !prevSlide.tags.includes(value));
-        let tagsInCommon = slides[i].tags.filter(value => prevSlide.tags.includes(value));
+        let prevSlideTag = diff(prevSlide.tags, new Set(slides[i].tags));
+        let currentSlideTag = diff(slides[i].tags, new Set(prevSlide.tags));
+        let tagsInCommon = intersect(prevSlide.tags, slides[i].tags);
 
         let min = Math.min(prevSlideTag.length, currentSlideTag.length, tagsInCommon.length);
         if(min > maxTagsInCommon) {

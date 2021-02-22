@@ -84,6 +84,7 @@ const parseInput = (contentToParse) => {
         let selectedSlide = slides.splice(selectedIndex, 1)[0];
 
         result.push(selectedSlide.index);
+        prevSlide=selectedSlide;
     }
 
     writeToFile(result);

@@ -16,15 +16,21 @@ const getResult = (contentToParse) => {
 	let result = [];
 
 	const rows = contentToParse.split('\n');
+	let streets = [];
+	let cars = [];
 
-	console.log(rows)
-	const [a, b, c, d] = rows[0].split(' ').map(el => parseInt(el));
+	const [simulationDuration, intersections, streetsNumber, carsNumber] = rows[0].split(' ').map(el => parseInt(el));
 
-	for(let i =1; i<rows.length ;i++){
-        console.log(rows[i]);
+	let i;
+	for(i =1; i<=streetsNumber; i++){
+        streets.push(rows[i]);
 	}
 
+	for(i; i<=streetsNumber + carsNumber; i++){
+		cars.push(rows[i]);
+	}
 
+	console.log(cars)
 
 
 	const end = now();

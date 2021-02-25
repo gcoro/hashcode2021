@@ -7,6 +7,33 @@ const readContent = () => {
 	return fs.readFileSync(path, 'utf8');
 };
 
+
+/**
+ * intersections Map {
+ *     1: {
+ *         atene: [[verde, black]],
+ *         amsterdam: [[verde]],
+ *         cars: [verde, black]
+ *     },
+ *     0: {
+ *         londra: [[arancione]]
+ *     }
+ * }
+ *
+ *
+ * amsterdam:cars: [null,  auto1, null,   null,  ......nSecondi], intersectionId:1, L:1
+ * atene:    cars: [auto2, null,  null,  auto1,  ......nSecondi], intersectionId:1, L:2
+ *
+ * londres:  cars: [auto1, null,  auto2,  null, ......nSecondi], intersectionId:0, L:1
+ *
+ * moscou:   cars: [null,  auto2, auto1, null,   ......nSecondi], intersectionId:2, L:3
+ *
+ * rome:     cars: [null,  null,  null,   auto1, ......nSecondi], intersectionId:3, L:1
+ *
+ * auto1:[ ]
+ *
+ * groupByIntersection, groupByNumberOfCars
+ */
 const writeToFile = (rows) => {
 	fs.writeFileSync('./' + name + '.out', rows.join('\n'), 'utf8');
 };
@@ -95,7 +122,7 @@ const execute = (simulationDuration, intersectionMap) => {
 		});
 	}
 
-	return [intersectionsScheduled, scheduledStreets];
+	return [intersectionMap.size, scheduledStreets];
 };
 
 const content = readContent();

@@ -44,6 +44,7 @@ const getResult = (contentToParse) => {
 
 	const rows = contentToParse.split('\n');
 	let streets = [];
+	let streetsMap = new Map();
 	let cars = [];
 	const [simulationDuration, intersectionsNumber, streetsNumber, carsNumber] = rows[0].split(' ').map(el => parseInt(el));
 	let intersectionMap = new Map();
@@ -58,6 +59,12 @@ const getResult = (contentToParse) => {
 			length: parseInt(data[3])
         });
 
+        streetsMap.set(streets[streets.length-1].name, {
+			// eslint-disable-next-line no-mixed-spaces-and-tabs
+        	'length': streets[streets.length-1].length,
+			'intersection': streets[streets.length-1].endIntersection,
+			'streetName': streets[streets.length-1].name
+		});
         if(!intersectionMap.has(streets[streets.length-1].endIntersection)){
 			intersectionMap.set(streets[streets.length-1].endIntersection, {
 				value: 1,
@@ -82,6 +89,37 @@ const getResult = (contentToParse) => {
 		});
 	}
 
+	let carsMatrix = new Array(cars.length); //rows
+
+
+	for(let k=0; k<cars.length; k++){
+		let streetLength = new Array();
+		for(let s=0; s<cars[k].streets.length; s++){
+			let streetEntry = streetsMap.get(cars[k].streets[s])
+			streetLength = streetLength
+				.concat(new Array(streetEntry.length).fill({id:-1}))
+				.concat([{'id':streetEntry.intersection,  'streetname': streetEntry.streetName}]);
+		}
+
+		carsMatrix[k]=streetLength;
+	}
+
+	console.log('************')
+	let status = new Array().fill(' ');
+
+	for(let h=0; h<simulationDuration;h++){
+		for(let y=0; y< carsMatrix.length ;y++) {
+			let tmpStatus = carsMatrix[y][h];
+			if(tmpStatus.id!=-1){
+				status[h] = (carsMatrix[y][h]);
+			}
+		}
+	}
+	console.log(status);
+
+	for(let h=0; h<status.length;h++){
+
+	}
 	//let intersectionsScheduled = 0;
 	//let scheduledStreets = [];
 	// let scheduledStreets = [{

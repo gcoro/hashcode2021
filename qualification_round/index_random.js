@@ -2,6 +2,7 @@ const path = process.argv[2];
 const name = path.split('/')[path.split('/').length - 1].split('.')[0];
 const fs = require('fs');
 const now = require('performance-now');
+const _ = require('lodash');
 
 const readContent = () => {
 	return fs.readFileSync(path, 'utf8');
@@ -43,7 +44,6 @@ const getResult = (contentToParse) => {
 	let result = [];
 
 	const rows = contentToParse.split('\n');
-	let streets = [];
 	let streetsMap = new Map();
 	let cars = [];
 	const [simulationDuration, intersectionsNumber, streetsNumber, carsNumber] = rows[0].split(' ').map(el => parseInt(el));
@@ -52,92 +52,60 @@ const getResult = (contentToParse) => {
 	let i;
 	for(i =1; i<=streetsNumber; i++){
 		let data = rows[i].split(' ');
-        streets.push({
-			startIntersection: parseInt(data[0]),
-			endIntersection: parseInt(data[1]),
+		streetsMap.set(data[2],{
+			intersectionId: parseInt(data[1]),
 			name: data[2],
-			length: parseInt(data[3])
+			length: parseInt(data[3]),
+			carsQueue: [],
+			points: 1
         });
-
-        streetsMap.set(streets[streets.length-1].name, {
-			// eslint-disable-next-line no-mixed-spaces-and-tabs
-        	'length': streets[streets.length-1].length,
-			'intersection': streets[streets.length-1].endIntersection,
-			'streetName': streets[streets.length-1].name
-		});
-        if(!intersectionMap.has(streets[streets.length-1].endIntersection)){
-			intersectionMap.set(streets[streets.length-1].endIntersection, {
-				value: 1,
-				streets: [streets[streets.length-1].name]
-			});
-		} else {
-			// eslint-disable-next-line no-mixed-spaces-and-tabs
-        	let intersectionEntry = intersectionMap.get(streets[streets.length-1].endIntersection);
-			// eslint-disable-next-line no-mixed-spaces-and-tabs
-        	intersectionMap.set(streets[streets.length-1].endIntersection, {
-				value: intersectionEntry.value + 1,
-				streets: [... intersectionEntry.streets, streets[streets.length-1].name]
-			});
-		}
 	}
-
 	for(i; i<=streetsNumber + carsNumber; i++){
 		let streets = rows[i].split(' ').slice(1);
+		let carId = i-1-streetsNumber;
+		for(let j =0; j< streets.length; j++) {
+			if(streetsMap.get(streets[j]).carsQueue[j]){//&& streetsMap.get(streets[j]).carsQueue[j].length>1
+				streetsMap.get(streets[j]).carsQueue[j].push(carId);
+			} else {
+				streetsMap.get(streets[j]).carsQueue[j] = [carId];
+			}
+		}
 		cars.push({
-			id: i-1-streetsNumber,
+			id: carId,
 			streets
 		});
 	}
 
-	let carsMatrix = new Array(cars.length); //rows
+	streetsMap = new Map([...streetsMap].filter(([k, value]) => value.carsQueue.length > 0 ));
 
-
-	for(let k=0; k<cars.length; k++){
-		let streetLength = new Array();
-		for(let s=0; s<cars[k].streets.length; s++){
-			let streetEntry = streetsMap.get(cars[k].streets[s])
-			streetLength = streetLength
-				.concat(new Array(streetEntry.length).fill({id:-1}))
-				.concat([{'id':streetEntry.intersection,  'streetname': streetEntry.streetName}]);
-		}
-
-		carsMatrix[k]=streetLength;
+	for (let [key, entry] of streetsMap) {
+		let trafficEverySeconds = Math.floor((simulationDuration/((entry.carsQueue.length))*simulationDuration/entry.length));
+		entry.points = 1 + Math.floor(entry.carsQueue.slice(0, trafficEverySeconds).filter(a=>a).length * 1/entry.length);
 	}
 
-	console.log('************')
-	let status = new Array().fill(' ');
+	let intersectionMaps = new Map();
 
-	for(let h=0; h<simulationDuration;h++){
-		for(let y=0; y< carsMatrix.length ;y++) {
-			let tmpStatus = carsMatrix[y][h];
-			if(tmpStatus.id!=-1){
-				status[h] = (carsMatrix[y][h]);
-			}
+	for (let [key, entry] of streetsMap) {
+		let intersection = intersectionMaps.get(entry.intersectionId);
+		if(intersection){
+			intersectionMaps.set(entry.intersectionId, (intersection + entry.points));
+		} else {
+			intersectionMaps.set(entry.intersectionId, entry.points);
 		}
 	}
-	console.log(status);
 
-	for(let h=0; h<status.length;h++){
+	let sortedIntersectionMaps = new Map([...intersectionMaps.entries()].sort((a, b) => b[1] - a[1]));
 
-	}
-	//let intersectionsScheduled = 0;
-	//let scheduledStreets = [];
-	// let scheduledStreets = [{
-	// 	intersectionId : 0,
-	// 	numberOfStreets: 0,
-	// 	streets: [['streetName', 'secondsOfGreen']]
-	// }];
+	//const [intersectionsScheduled, scheduledStreets] = execute(simulationDuration, intersectionMap);
 
+	result.push(sortedIntersectionMaps.size);
 
-	const [intersectionsScheduled, scheduledStreets] = execute(simulationDuration, intersectionMap);
-
-
-	result.push(intersectionsScheduled);
-	for(let j =0; j< scheduledStreets.length; j++){
-		result.push(scheduledStreets[j].intersectionId);
-		result.push(scheduledStreets[j].numberOfStreets);
-		for(let k=0; k< scheduledStreets[j].streets.length; k++){
-			result.push(scheduledStreets[j].streets[k].join(' '));
+	for (let [key, entry] of sortedIntersectionMaps) {
+		result.push(key);
+		let numberOfStreets =Array.from(streetsMap.values()).filter(el => el.intersectionId==key);
+		result.push(numberOfStreets.length);
+		for(let k=0; k< numberOfStreets.length; k++){
+			result.push(numberOfStreets[k].name + ' ' + numberOfStreets[k].points);
 		}
 	}
 
@@ -146,22 +114,6 @@ const getResult = (contentToParse) => {
     writeToFile(result);
 };
 
-
-const execute = (simulationDuration, intersectionMap) => {
-	let intersectionsScheduled = 0;
-	let scheduledStreets = [];
-
-	for (let [key, entry] of intersectionMap) {
-		let streets = entry.streets.map(el => [el, Math.floor(simulationDuration/entry.value)]);
-		scheduledStreets.push({
-			'intersectionId': key,
-			'numberOfStreets': entry.value,
-			streets
-		});
-	}
-
-	return [intersectionMap.size, scheduledStreets];
-};
 
 const content = readContent();
 getResult(content);

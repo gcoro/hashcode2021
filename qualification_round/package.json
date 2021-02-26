@@ -13,6 +13,7 @@
     "author": "gcoro",
     "license": "ISC",
     "dependencies": {
+        "lodash": "^4.17.21",
         "performance-now": "2.1.0"
     },
     "devDependencies": {

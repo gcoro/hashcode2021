@@ -60,6 +60,7 @@ const getResult = (contentToParse) => {
 			points: 1
         });
 	}
+
 	for(i; i<=streetsNumber + carsNumber; i++){
 		let streets = rows[i].split(' ').slice(1);
 		let carId = i-1-streetsNumber;
@@ -78,9 +79,30 @@ const getResult = (contentToParse) => {
 
 	streetsMap = new Map([...streetsMap].filter(([k, value]) => value.carsQueue.length > 0 ));
 
+	// let trafficEverySeconds = Math.floor((simulationDuration/((entry.carsQueue.length))*simulationDuration/entry.length));
+	// entry.points = 1 + Math.floor(entry.carsQueue.slice(0, trafficEverySeconds).filter(a=>a).length * 1/entry.length);
+
+	/** best solution but not for F
+	 let trafficEverySeconds = Math.floor(simulationDuration/(entry.carsQueue.length*simulationDuration/entry.length));
+	 entry.points = 1 + Math.floor(entry.carsQueue.slice(0, trafficEverySeconds).filter(a=>a).length * 1/entry.length);
+	 *
+	 */
+
+	/** best on average for all
+	 let trafficEverySeconds = Math.floor(simulationDuration/(entry.carsQueue.length));
+	 entry.points = 1 + Math.floor(entry.carsQueue.slice(0, trafficEverySeconds).filter(a=>a).length);
+	 *
+	 */
+
+/**
+ * 	for (let [key, entry] of streetsMap) {
+		let trafficEverySeconds = Math.floor((1/simulationDuration)/(entry.carsQueue.length));
+		entry.points = 1;
+	}
+ **/
 	for (let [key, entry] of streetsMap) {
-		let trafficEverySeconds = Math.floor((simulationDuration/((entry.carsQueue.length))*simulationDuration/entry.length));
-		entry.points = 1 + Math.floor(entry.carsQueue.slice(0, trafficEverySeconds).filter(a=>a).length * 1/entry.length);
+		let trafficEverySeconds = Math.floor((1/simulationDuration)/(entry.carsQueue.length));
+		entry.points = Math.floor(entry.carsQueue.slice(0, trafficEverySeconds).filter(a=>a).length) + Math.ceil(1/entry.length);
 	}
 
 	let intersectionMaps = new Map();
@@ -104,8 +126,15 @@ const getResult = (contentToParse) => {
 		result.push(key);
 		let numberOfStreets =Array.from(streetsMap.values()).filter(el => el.intersectionId==key);
 		result.push(numberOfStreets.length);
+		let streetMaps = new Map();
+
 		for(let k=0; k< numberOfStreets.length; k++){
-			result.push(numberOfStreets[k].name + ' ' + numberOfStreets[k].points);
+			streetMaps.set(numberOfStreets[k].name, numberOfStreets[k].points);
+		}
+		let sortedStreetsMaps = new Map([...streetMaps.entries()].sort((a, b) => a[1]-b[1]));
+
+		for (let [name, value] of sortedStreetsMaps) {
+			result.push(name + ' ' + value);
 		}
 	}
 
